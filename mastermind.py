@@ -74,6 +74,8 @@ def jouer_partie():
     code_secret = generer_code_secret()
     afficher_couleurs()
 
+    print(code_secret)  
+
     for tentative in range(1, MAX_ESSAIS + 1):
         print(f"--- Essai {tentative}/{MAX_ESSAIS} ---")
         essai = saisir_essai()
@@ -85,7 +87,7 @@ def jouer_partie():
             print(f"Bravo ! Code trouvé en {tentative} essai(s). Score : {score}")
             return score
 
-    print(f"Perdu ! Le code secret était : {''.join(code_secret)}. Score : 0")
+    print(f"Perdu ! Le code secret était : {code_secret}. Score : 0")
     return 0
 
 
