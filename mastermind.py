@@ -67,10 +67,6 @@ def comparer(code_secret, essai):
 
 
 def jouer_partie():
-    """
-    Fait jouer une partie complète.
-    Renvoie le score obtenu (MAX_ESSAIS - tentatives, ou 0 si perdu).
-    """
     code_secret = generer_code_secret()
     afficher_couleurs()
 
@@ -89,9 +85,6 @@ def jouer_partie():
     return 0
 
 
-# ============================================================
-# PROGRAMME PRINCIPAL
-# ============================================================
 
 if __name__ == "__main__":
     jouer_partie()
