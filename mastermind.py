@@ -1,4 +1,5 @@
 import random
+import os
 
 
 # ==============
@@ -17,17 +18,22 @@ COULEURS = {
 TAILLE_CODE = 4     # nombre d'éléments dans le code secret
 MAX_ESSAIS = 12     # nombre maximal de tentatives
 
+# Nom du fichier de stats
+NOM_FICHIER_STATS = ".mastermind_stats.txt"
 
+# Chemin complet du fichier de stats, toujours à côté du script.
+DOSSIER_SCRIPT = os.path.dirname(os.path.abspath(__file__))
+CHEMIN_STATS = os.path.join(DOSSIER_SCRIPT, NOM_FICHIER_STATS)
 
 
 def generer_code_secret():
-    lettres_disponibles = list(COULEURS.keys())
+    lettres_disponibles = list(COULEURS)
     return [random.choice(lettres_disponibles) for _ in range(TAILLE_CODE)]
 
 
 def afficher_couleurs():
     print("Couleurs disponibles :")
-    for lettre, nom in COULEURS.items():
+    for lettre, nom in COULEURS:
         print(f"  {lettre} = {nom}")
     print()
 
@@ -43,8 +49,6 @@ def saisir_essai():
 def comparer(code_secret, essai):
     """
     Renvoie (nb_correct, nb_partiel) :
-    - correct : bonne couleur ET bon emplacement
-    - partiel : bonne couleur mais mauvais emplacement
     """
     nb_correct = 0
     secret_restant = []
@@ -85,6 +89,111 @@ def jouer_partie():
     return 0
 
 
+# ==============
+# STATISTIQUES
+# ==============
+
+def lire_stats():
+    """
+    Lit le fichier de stats et renvoie (nombre_parties, score_total).
+    """
+    if not os.path.exists(CHEMIN_STATS):
+        return 0, 0
+
+    with open(CHEMIN_STATS, "r") as fichier:
+        contenu = fichier.read().strip()
+        if contenu == "":
+            return 0, 0
+        parties, score = contenu.split(";")
+        return int(parties), int(score)
+
+
+def ecrire_stats(nb_parties, score_total):
+    with open(CHEMIN_STATS, "w") as fichier:
+        fichier.write(f"{nb_parties};{score_total}")
+
+
+def reset_stats():
+    ecrire_stats(0, 0)
+    print("Les statistiques ont été remises à zéro.\n")
+
+
+def afficher_stats():
+    """Affiche les statistiques actuelles."""
+    nb_parties, score_total = lire_stats()
+    print("----- Statistiques -----")
+    print(f"Parties jouées : {nb_parties}")
+    print(f"Score total    : {score_total}")
+    print("------------------------\n")
+
+
+# ==============
+# MENUS
+# ==============
+
+def menu_principal():
+    """Menu affiché au lancement du jeu (avant la première partie)."""
+    while True:
+        print("Que voulez-vous faire ?")
+        print("1. Jouer")
+        print("2. Remettre à zéro les statistiques")
+        print("3. Quitter")
+        choix = input("Votre choix : ").strip()
+
+        if choix in ("1", "2", "3"):
+            return choix
+        print("Choix invalide, réessayez.\n")
+
+
+def menu_apres_partie():
+    """Menu affiché une fois qu'au moins une partie a été terminée."""
+    while True:
+        print("Que voulez-vous faire ?")
+        print("1. Rejouer")
+        print("2. Remettre à zéro les statistiques")
+        print("3. Quitter")
+        choix = input("Votre choix : ").strip()
+
+        if choix in ("1", "2", "3"):
+            return choix
+        print("Choix invalide, réessayez.\n")
+
+
+# ==============
+# PROGRAMME PRINCIPAL
+# ==============
+
+def main():
+    print("=== MASTERMIND ===\n")
+
+    a_deja_joue = False  # sert à savoir quel menu afficher (Jouer / Rejouer)
+    en_jeu = True
+
+    while en_jeu:
+        afficher_stats()
+
+        choix = menu_principal() if not a_deja_joue else menu_apres_partie()
+        print()
+
+        if choix == "1":
+            score = jouer_partie()
+            a_deja_joue = True
+
+            # Mise à jour des statistiques dans le fichier
+            nb_parties, score_total = lire_stats()
+            nb_parties += 1
+            score_total += score
+            ecrire_stats(nb_parties, score_total)
+
+            afficher_stats()
+
+        elif choix == "2":
+            reset_stats()
+
+        elif choix == "3":
+            print("Merci d'avoir joué, à bientôt !")
+            en_jeu = False
+
 
 if __name__ == "__main__":
-    jouer_partie()
+    main()
