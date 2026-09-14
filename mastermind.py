@@ -33,7 +33,7 @@ def generer_code_secret():
 
 def afficher_couleurs():
     print("Couleurs disponibles :")
-    for lettre, nom in COULEURS:
+    for lettre, nom in COULEURS.items():
         print(f"  {lettre} = {nom}")
     print()
 
