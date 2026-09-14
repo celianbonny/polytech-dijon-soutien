@@ -1,6 +1,10 @@
 import random
 
-# Couleurs disponibles
+
+# ==============
+# CONFIGURATION
+# ==============
+
 COULEURS = {
     "R": "Rouge",
     "V": "Vert",
@@ -15,57 +19,79 @@ MAX_ESSAIS = 12     # nombre maximal de tentatives
 
 
 
-lettres_disponibles = list(COULEURS.keys())
-code_secret = [random.choice(lettres_disponibles) for _ in range(TAILLE_CODE)]
+
+def generer_code_secret():
+    lettres_disponibles = list(COULEURS.keys())
+    return [random.choice(lettres_disponibles) for _ in range(TAILLE_CODE)]
 
 
-print("Couleurs disponibles :")
-for lettre, nom in COULEURS.items():
-    print(f"  {lettre} = {nom}")
-print()
+def afficher_couleurs():
+    print("Couleurs disponibles :")
+    for lettre, nom in COULEURS.items():
+        print(f"  {lettre} = {nom}")
+    print()
 
 
-trouve = False
-
-for tentative in range(1, MAX_ESSAIS + 1):
-    print(f"--- Essai {tentative}/{MAX_ESSAIS} ---")
-
-    # Saisie du joueur, avec vérification de la longueur
+def saisir_essai():
     while True:
         essai = input(f"Votre essai ({TAILLE_CODE} lettres) : ").strip().upper()
         if len(essai) == TAILLE_CODE:
-            break
+            return list(essai)
         print(f"Erreur : il faut exactement {TAILLE_CODE} lettres.")
-    essai = list(essai)
 
-    # Comptage des "Correct" (bonne couleur ET bonne position)
+
+def comparer(code_secret, essai):
+    """
+    Renvoie (nb_correct, nb_partiel) :
+    - correct : bonne couleur ET bon emplacement
+    - partiel : bonne couleur mais mauvais emplacement
+    """
     nb_correct = 0
     secret_restant = []
     essai_restant = []
+
     for i in range(len(code_secret)):
         if code_secret[i] == essai[i]:
             nb_correct += 1
         else:
-            # on garde de côté ce qui n'a pas matché, pour l'étape suivante
             secret_restant.append(code_secret[i])
             essai_restant.append(essai[i])
 
-    # Comptage des "Partiel" (bonne couleur, mauvaise position)
     nb_partiel = 0
     for couleur in essai_restant:
         if couleur in secret_restant:
             nb_partiel += 1
-            secret_restant.remove(couleur)  # pour ne pas compter deux fois le même pion
+            secret_restant.remove(couleur)
 
-    print(f"Correct : {nb_correct} | Partiel : {nb_partiel}\n")
-
-    if nb_correct == TAILLE_CODE:
-        trouve = True
-        break
+    return nb_correct, nb_partiel
 
 
-if trouve:
-    score = MAX_ESSAIS - tentative
-    print(f"Bravo ! Code trouvé en {tentative} essai(s). Score : {score}")
-else:
+def jouer_partie():
+    """
+    Fait jouer une partie complète.
+    Renvoie le score obtenu (MAX_ESSAIS - tentatives, ou 0 si perdu).
+    """
+    code_secret = generer_code_secret()
+    afficher_couleurs()
+
+    for tentative in range(1, MAX_ESSAIS + 1):
+        print(f"--- Essai {tentative}/{MAX_ESSAIS} ---")
+        essai = saisir_essai()
+        nb_correct, nb_partiel = comparer(code_secret, essai)
+        print(f"Correct : {nb_correct} | Partiel : {nb_partiel}\n")
+
+        if nb_correct == TAILLE_CODE:
+            score = MAX_ESSAIS - tentative
+            print(f"Bravo ! Code trouvé en {tentative} essai(s). Score : {score}")
+            return score
+
     print(f"Perdu ! Le code secret était : {''.join(code_secret)}. Score : 0")
+    return 0
+
+
+# ============================================================
+# PROGRAMME PRINCIPAL
+# ============================================================
+
+if __name__ == "__main__":
+    jouer_partie()
